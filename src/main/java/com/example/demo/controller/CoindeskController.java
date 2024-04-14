@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -70,24 +72,69 @@ public class CoindeskController {
 		model.addAttribute("message", "新增成功");
 		return "index";
 	}
-	
+	//測試呼叫查詢幣別對應表資料API，並顯示其內容。
 	@GetMapping("/seach")
-	public String seach(@RequestParam(value="insert") String insert,Model model) {
-		coindeskService.listCoindesks();
-		model.addAttribute("message", 	coindeskService.listCoindesks().size());
+	public String seach() {
+		String code="USD";//幣別
+//	List<CoindeskModel> a=	coindeskService.listCoindesks();
+	CoindeskModel coindeskModel=coindeskService.getCoindeskModel(code);
+	
+	System.out.println("code-->"+coindeskModel.getCode());
+	System.out.println("description-->"+coindeskModel.getDescription());
+	System.out.println("rate-->"+coindeskModel.getRate());
+	System.out.println("rate_float-->"+coindeskModel.getRate_float());
+	System.out.println("symbol-->"+coindeskModel.getSymbol());
+	
+	
 		return "index";
 	}
 
 	@GetMapping("/delete")
 	public String delete() {
-		System.out.println(13);
-		return "";
+		String code="USD";//幣別
+		coindeskService.deleteCoindeskModel(code);
+		return "index";
 	}
 	
 	@GetMapping("/update")
 	public String update() {
-		System.out.println(13);
-		return "";
+		String code="USD";
+		String des="testDes";
+		
+		coindeskService.updateCoindesk(des, code);
+		return "index";
 	}
-	
+	//5. 測試呼叫coindesk API，並顯示其內容。
+	@GetMapping("/callApi")
+	public String callApi() {
+		JSONObject m=new JSONObject(responseData);
+		System.out.println(m);
+		return "index";
+	}
+	//6. 測試呼叫資料轉換的API，並顯示其內容。
+	@GetMapping("/callApiUpdate")
+	public String callApiUpdate() {
+		JSONObject m=new JSONObject(responseData);
+		JSONObject time=(JSONObject) m.get("time");	
+		//{"updateduk":"Apr 14, 2024 at 14:31 BST","updatedISO":"2024-04-14T13:31:45+00:00","updated":"Apr 14, 2024 13:31:45 UTC"}
+		
+		//1990/01/01 00:00:00）
+		
+		String updateduk=(String) time.get("updateduk");
+		String updatedISO=(String) time.get("updatedISO");
+		String updated=(String) time.get("updated");
+		//Apr 14, 2024 13:31:45 UTC
+		//MMM dd, yyyy HH:mm:ss z
+        DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss zzzz");
+        LocalDateTime dateTime = LocalDateTime.parse(updated, originalFormatter);
+
+        DateTimeFormatter targetFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        String formattedDateTime = dateTime.format(targetFormatter);
+		
+		
+		
+		
+		System.out.println(formattedDateTime);
+		return "index";
+	}
 }
